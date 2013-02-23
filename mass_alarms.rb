@@ -27,6 +27,7 @@ else
   cw = AWS::CloudWatch.new
   cw.metrics.each { |m|
     metric_namespace_name = m.metric_name + ":" + m.namespace
+    dimension = m.dimensions[0]
     if dimension
       metrics[metric_namespace_name] = m
     end
