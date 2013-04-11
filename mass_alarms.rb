@@ -1,6 +1,14 @@
 require 'rubygems'
 require 'aws-sdk'
 
+access_key_id = '<ACCESS_KEY>'
+secret_key = '<SECRET>'
+
+AWS.config({
+  :access_key_id => access_key_id,
+  :secret_access_key => secret_key
+})
+
 puts "\nLoading instances..."
 if File.exist?('instances.yaml')
   instances_by_id = YAML.load_file('instances.yaml')
@@ -81,9 +89,13 @@ cw.metrics.each { |m|
   metric_name = m.metric_name
   namespace = m.namespace
   dimension = m.dimensions[0]
-  if dimension and metric_namespace_name == metric and dimension[:name] = 'InstanceId'
+  if dimension and metric_namespace_name == metric
     instance_id = dimension[:value]
-    instance_name = instances_by_id[instance_id]
+    if dimension[:name] == 'InstanceId'
+      instance_name = instances_by_id[instance_id]
+    elsif dimension[:name] == 'Hostname'
+      instance_name = instance_id
+    end
     if instance_name
       alarm_name = instance_name+"-"+instance_id+"-"+metric_name
       puts "Setting alarm '%s' for metric %s on instance %s (%s)" % [alarm_name, metric_namespace_name, instance_name, instance_id]
